@@ -112,7 +112,7 @@ jobs:
         anykernel3_commit: ${{ inputs.anykernel3_commit }}
       env:
         BOOT_SIGN_KEY: ${{ secrets.BOOT_SIGN_KEY }}
-          
+
     - name: Download Kernel Repository
       uses: ./.github/actions/download-kernel
       with:
@@ -305,6 +305,12 @@ jobs:
       with:
         kernel_version: ${{ inputs.kernel_version }}
 
+    - name: Setup ZRAM
+      uses: ./.github/actions/zram
+      with:
+        kernel_version: ${{ inputs.kernel_version }}
+        android_version: ${{ inputs.android_version }}
+
     - name: Setup Misc Configs
       uses: ./.github/actions/misc
 
@@ -369,7 +375,7 @@ jobs:
       id: scan
       if: always()
       uses: ./.github/actions/scan-patch-rejects
-        
+
     - name: Upload Rejects
       if: always()
       uses: actions/upload-artifact@v7
@@ -524,14 +530,14 @@ jobs:
         fi
         SUMMARY_FILE="/tmp/build-summary-${SUMMARY_BASE}.md"
         echo "SUMMARY_BASE=${SUMMARY_BASE}" >> "$GITHUB_ENV"
-        
+
         # Determine build status
         if [ "${{ job.status }}" = "success" ]; then
           STATUS="[+] Success"
         else
           STATUS="[-] Failed"
         fi
-        
+
         # Get kernel version from Image if available
         KERNEL_VER_STR=""
         if [ -f "/home/runner/out/dist/Image" ]; then
@@ -539,7 +545,7 @@ jobs:
         elif [ -f "/home/runner/out/Image" ]; then
           KERNEL_VER_STR=$(strings "/home/runner/out/Image" | grep -m1 "^Linux version " | sed 's/Linux version //' || echo "")
         fi
-        
+
         # Get KSU version from env (set by kernelsu action)
         KSU_VER="${KSU_VERSION:-N/A}"
         KSU_TAG="${KSU_GIT_TAG:-N/A}"
@@ -555,16 +561,16 @@ jobs:
         if [ -f "${{ github.workspace }}/kernel/common/include/linux/susfs.h" ]; then
           SUSFS_VER=$(grep '#define SUSFS_VERSION' "${{ github.workspace }}/kernel/common/include/linux/susfs.h" | awk -F'"' '{print $2}' || echo "N/A")
         fi
-        
+
         # Get cache stats from env (set by cache-stats action)
         CCACHE_HIT="${CCACHE_HIT_RATE:-N/A}"
-        
+
         # Get build time (approximate from step timing)
         BUILD_TIME="N/A"
-        
+
         # Count warnings from build log if available
         WARNINGS="N/A"
-        
+
         {
           echo "## ${{ inputs.android_version }} ${{ inputs.kernel_version }}.${{ inputs.sublevel }} (${{ inputs.variant }}) - ${STATUS}"
           echo
@@ -587,7 +593,7 @@ jobs:
           echo "| **Feature Set** | ${{ inputs.feature_set }} |"
           echo "| **Variant** | ${{ inputs.variant }} |"
           echo
-          
+
           # Kernel Fixes
           if [ -f /tmp/kernel-fixes-summary.md ]; then
             echo "### Kernel Fixes"
