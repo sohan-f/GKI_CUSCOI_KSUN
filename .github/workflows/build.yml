@@ -236,7 +236,7 @@ jobs:
 
     - name: Apply Performance Patches
       uses: ./.github/actions/performance
-      if: false
+      if: true
       with:
         kernel_version: ${{ inputs.kernel_version }}
 
