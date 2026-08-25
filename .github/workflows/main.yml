@@ -127,7 +127,7 @@ jobs:
     outputs:
       nomount_commit: ${{ steps.resolve.outputs.nomount_commit }}
     steps:
-      - name: Resolve latest NoMount dev commit
+      - name: Resolve latest NoMount master commit
         id: resolve
         if: ${{ contains(inputs.feature_set, 'NOMOUNT') || inputs.feature_set == 'FULL' }}
         shell: bash
